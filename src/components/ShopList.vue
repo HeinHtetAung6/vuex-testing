@@ -1,21 +1,27 @@
 <template>
     <h1>Shopping Lists</h1>
-    <ul>
+    <img v-if="loading" src="https://i.imgur.com/JfPpwOA.gif">
+    <ul v-else>
         <li v-for="product in products" :key="product.id">{{ product.title }} - {{ product.price }}</li>
     </ul>
 </template>
 
 <script>
-import shop from '@/api/shop'
+
 export default {
     data(){
         return {
-            products: []
+            loading : false
+        }
+    },
+    computed: {
+        products(){
+            return this.$store.getters.availableProducts
         }
     },
     created() {
-        shop.getProducts(products => {
-            this.products = products
-        })
+        this.loading = true
+        this.$store.dispatch('fetchProducts')
+        .then(() => this.loading = false)
     }
 }</script>
