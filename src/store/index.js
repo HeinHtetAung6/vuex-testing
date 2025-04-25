@@ -5,7 +5,8 @@ import shop from '@/api/shop'
 const store = createStore({
   state: {
     products : [],
-    cart: []
+    cart: [],
+    checkoutStatus: null
   },
 
 
@@ -24,6 +25,12 @@ const store = createStore({
     },
     decrementProuctInventory(state,product){
       product.inventory --
+    },
+    setCheckoutStatus (state, status) {
+      state.checkoutStatus = status
+    },
+    emptyCart (state) {
+      state.cart = []
     }
   },
 
@@ -49,7 +56,18 @@ const store = createStore({
       }
     }
   },
-
+  checkout ({state, commit}) {
+    shop.buyProducts(
+      state.cart,
+      () => {
+        commit('emptyCart')
+        commit('setCheckoutStatus', 'success')
+      },
+      () => {
+        commit('setCheckoutStatus', 'fail')
+      }
+    )
+  },
 
   getters: {
     availableProducts(state,getters){
@@ -64,6 +82,9 @@ const store = createStore({
           quantity: cartItem.quantity 
         }
       })
+    },
+    cartTotal(state,getters){
+      return getters.cartProducts.reduce((total, product) => total + product.price * product.quantity, 0)
     }
   }
 })
